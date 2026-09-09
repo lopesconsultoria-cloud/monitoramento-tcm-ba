@@ -524,6 +524,10 @@ input::placeholder { color: var(--muted); opacity: .6; }
   line-height: 1.55;
 }
 
+/* ── Autocomplete entity ──────────────────────────────────── */
+optgroup { font-style: normal; font-size: .8rem; }
+.entidade-select option[value=""] { color: var(--muted); }
+
 /* ── Footer ────────────────────────────────────────────────── */
 footer {
   margin-top: clamp(2.5rem, 5vw, 4rem);
@@ -702,7 +706,438 @@ footer a:hover { text-decoration: underline; }
   </p>
 </footer>
 
+<datalist id="municipios-list"></datalist>
+
 <script>
+// ── Base TCM-BA: municípios → entidades ─────────────────────
+const ENTIDADES_TCM = {
+  "Abaíra":["Prefeitura","Câmara","SAAE"],
+  "Abaré":["Prefeitura","Câmara"],
+  "Acajutiba":["Prefeitura","Câmara"],
+  "Adustina":["Prefeitura","Câmara","CXPREV"],
+  "Água Fria":["Prefeitura","Câmara"],
+  "Aiquara":["Prefeitura","Câmara"],
+  "Alagoinhas":["Prefeitura","Câmara","CLINAB","SAAE","SMTT"],
+  "Alcobaça":["Prefeitura","Câmara"],
+  "Almadina":["Prefeitura","Câmara"],
+  "Amargosa":["Prefeitura","Câmara"],
+  "Amélia Rodrigues":["Prefeitura","Câmara","CDSTPS"],
+  "América Dourada":["Prefeitura","Câmara"],
+  "Anagé":["Prefeitura","Câmara"],
+  "Andaraí":["Prefeitura","Câmara","CIDCD"],
+  "Andorinha":["Prefeitura","Câmara"],
+  "Angical":["Prefeitura","Câmara"],
+  "Anguera":["Prefeitura","Câmara"],
+  "Antas":["Prefeitura","Câmara"],
+  "Antônio Cardoso":["Prefeitura","Câmara"],
+  "Antônio Gonçalves":["Prefeitura","Câmara","CXPREV"],
+  "Apóra":["Prefeitura","Câmara"],
+  "Apuarema":["Prefeitura","Câmara","SAAE"],
+  "Aracás":["Prefeitura","Câmara"],
+  "Aracatu":["Prefeitura","Câmara"],
+  "Araci":["Prefeitura","Câmara"],
+  "Aramari":["Prefeitura","Câmara"],
+  "Arataca":["Prefeitura","Câmara"],
+  "Aratuípe":["Prefeitura","Câmara"],
+  "Aurelino Leal":["Prefeitura","Câmara"],
+  "Baianópolis":["Prefeitura","Câmara"],
+  "Baixa Grande":["Prefeitura","Câmara"],
+  "Banzaê":["Prefeitura","Câmara"],
+  "Barra":["Prefeitura","Câmara","SAAE"],
+  "Barra da Estiva":["Prefeitura","Câmara"],
+  "Barra do Choça":["Prefeitura","Câmara"],
+  "Barra do Mendes":["Prefeitura","Câmara","IAPASBAME"],
+  "Barra do Rocha":["Prefeitura","Câmara","IPBR"],
+  "Barreiras":["Prefeitura","Câmara","CISMOB","CONSID/UMOB","CONSOB","EDUCÃO","SAÚDE"],
+  "Barro Alto":["Prefeitura","Câmara"],
+  "Barro Preto":["Prefeitura","Câmara","SAAE"],
+  "Barrocas":["Prefeitura","Câmara"],
+  "Belmonte":["Prefeitura","Câmara"],
+  "Belo Campo":["Prefeitura","Câmara"],
+  "Biritinga":["Prefeitura","Câmara"],
+  "Boa Nova":["Prefeitura","Câmara"],
+  "Boa Vista do Tupim":["Prefeitura","Câmara"],
+  "Bom Jesus da Lapa":["Prefeitura","Câmara","CDSVELHOCHIC","SAAE"],
+  "Bom Jesus da Serra":["Prefeitura","Câmara"],
+  "Boninal":["Prefeitura","Câmara"],
+  "Bonito":["Prefeitura","Câmara","FUNPREV"],
+  "Boquira":["Prefeitura","Câmara","SAAE"],
+  "Botuporã":["Prefeitura","Câmara"],
+  "Brejões":["Prefeitura","Câmara"],
+  "Brejolândia":["Prefeitura","Câmara"],
+  "Brotas de Macaúbas":["Prefeitura","Câmara"],
+  "Brumado":["Prefeitura","Câmara","CAMUP","CIB","CISB"],
+  "Buerarema":["Prefeitura","Câmara"],
+  "Buritirana":["Prefeitura","Câmara","SAAE"],
+  "Caatiba":["Prefeitura","Câmara"],
+  "Cabaceiras do Paraguaçu":["Prefeitura","Câmara"],
+  "Cachoeira":["Prefeitura","Câmara"],
+  "Caculé":["Prefeitura","Câmara"],
+  "Caém":["Prefeitura","Câmara"],
+  "Caetanos":["Prefeitura","Câmara"],
+  "Caetité":["Prefeitura","Câmara"],
+  "Cafarnaum":["Prefeitura","Câmara"],
+  "Cairu":["Prefeitura","Câmara"],
+  "Caldeirão Grande":["Prefeitura","Câmara","CAPEC","EMAS"],
+  "Camaçari":["Prefeitura","Câmara","CODETUR","DECASA","DECOM","EDUCÃO","FUNEMC","FUSAMC","ISSM","LIMPEC","SAÚDE","STT"],
+  "Camacã":["Prefeitura","Câmara"],
+  "Camamu":["Prefeitura","Câmara"],
+  "Campo Alegre de Lourdes":["Prefeitura","Câmara","SAAE"],
+  "Campo Formoso":["Prefeitura","Câmara","IPCF"],
+  "Canápolis":["Prefeitura","Câmara"],
+  "Canarana":["Prefeitura","Câmara"],
+  "Canavieiras":["Prefeitura","Câmara"],
+  "Candeal":["Prefeitura","Câmara"],
+  "Candeias":["Prefeitura","Câmara","CIRMS","EDUCÃO","SAÚDE"],
+  "Candiba":["Prefeitura","Câmara"],
+  "Cândido Sales":["Prefeitura","Câmara"],
+  "Cansanção":["Prefeitura","Câmara"],
+  "Canudos":["Prefeitura","Câmara"],
+  "Capela do Alto Alegre":["Prefeitura","Câmara","CAPELAPREV"],
+  "Capim Grosso":["Prefeitura","Câmara"],
+  "Caraíbas":["Prefeitura","Câmara","CAPREVAC"],
+  "Caravelas":["Prefeitura","Câmara"],
+  "Cardeal da Silva":["Prefeitura","Câmara"],
+  "Carinhanha":["Prefeitura","Câmara","SAAE"],
+  "Casa Nova":["Prefeitura","Câmara","FHCN","SAAE"],
+  "Castro Alves":["Prefeitura","Câmara","CIRB"],
+  "Catalândia":["Prefeitura","Câmara","SAAE"],
+  "Catu":["Prefeitura","Câmara","CDSTLNA","ISOC","SAAE"],
+  "Caturama":["Prefeitura","Câmara","CDSTBP"],
+  "Central":["Prefeitura","Câmara"],
+  "Chorrochó":["Prefeitura","Câmara"],
+  "Cícero Dantas":["Prefeitura","Câmara","CMDCA"],
+  "Cipó":["Prefeitura","Câmara"],
+  "Coaraci":["Prefeitura","Câmara"],
+  "Cocos":["Prefeitura","Câmara","SAAE"],
+  "Conceição da Feira":["Prefeitura","Câmara"],
+  "Conceição do Almeida":["Prefeitura","Câmara"],
+  "Conceição do Coité":["Prefeitura","Câmara"],
+  "Conceição do Jacuípe":["Prefeitura","Câmara"],
+  "Conde":["Prefeitura","Câmara"],
+  "Condeúba":["Prefeitura","Câmara"],
+  "Contendas do Sincorá":["Prefeitura","Câmara"],
+  "Coração de Maria":["Prefeitura","Câmara","IPCM"],
+  "Cordeiros":["Prefeitura","Câmara"],
+  "Coribe":["Prefeitura","Câmara","SAAE"],
+  "Coronel João Sá":["Prefeitura","Câmara"],
+  "Correntina":["Prefeitura","Câmara","IMUPRE","SAAE"],
+  "Cotegipe":["Prefeitura","Câmara","SAAE"],
+  "Cravolândia":["Prefeitura","Câmara"],
+  "Crisópolis":["Prefeitura","Câmara"],
+  "Cristópolis":["Prefeitura","Câmara"],
+  "Cruz das Almas":["Prefeitura","Câmara"],
+  "Curaçá":["Prefeitura","Câmara","SAAE"],
+  "Dário Meira":["Prefeitura","Câmara"],
+  "Dias d'Ávila":["Prefeitura","Câmara"],
+  "Dom Basílio":["Prefeitura","Câmara","SAAE"],
+  "Dom Macedo Costa":["Prefeitura","Câmara"],
+  "Elísio Medrado":["Prefeitura","Câmara"],
+  "Encruzilhada":["Prefeitura","Câmara"],
+  "Entre Rios":["Prefeitura","Câmara"],
+  "Érico Cardoso":["Prefeitura","Câmara","SAAE"],
+  "Esplanada":["Prefeitura","Câmara"],
+  "Euclides da Cunha":["Prefeitura","Câmara"],
+  "Eunápolis":["Prefeitura","Câmara","CONDESC"],
+  "Fátima":["Prefeitura","Câmara"],
+  "Feira da Mata":["Prefeitura","Câmara","SAAE"],
+  "Feira de Santana":["Prefeitura","Câmara","ARFES","ARSEPUC","CABANA","CSRFS","EDUCÃO","FETC","FHFS","FJA","IPFS","IPSEMFS","PROCON","SAÚDE","SMT","SURFEIRA"],
+  "Filadélfia":["Prefeitura","Câmara","CXPREV"],
+  "Firmino Alves":["Prefeitura","Câmara"],
+  "Floresta Azul":["Prefeitura","Câmara"],
+  "Formosa do Rio Preto":["Prefeitura","Câmara"],
+  "Gandu":["Prefeitura","Câmara","SAAE"],
+  "Gavião":["Prefeitura","Câmara","CASEG"],
+  "Gentio do Ouro":["Prefeitura","Câmara"],
+  "Glória":["Prefeitura","Câmara","FMS"],
+  "Gongogi":["Prefeitura","Câmara"],
+  "Governador Mangabeira":["Prefeitura","Câmara"],
+  "Guajeru":["Prefeitura","Câmara"],
+  "Guanambi":["Prefeitura","Câmara","CINSRAS"],
+  "Guaratinga":["Prefeitura","Câmara"],
+  "Heliópolis":["Prefeitura","Câmara"],
+  "Iaçu":["Prefeitura","Câmara"],
+  "Ibiassucê":["Prefeitura","Câmara"],
+  "Ibicará":["Prefeitura","Câmara","CDSTLS","SAAE"],
+  "Ibicoara":["Prefeitura","Câmara","IPREVIB"],
+  "Ibicuí":["Prefeitura","Câmara"],
+  "Ibipeba":["Prefeitura","Câmara"],
+  "Ibipitanga":["Prefeitura","Câmara"],
+  "Ibiquera":["Prefeitura","Câmara"],
+  "Ibirapitanga":["Prefeitura","Câmara"],
+  "Ibirapoã":["Prefeitura","Câmara"],
+  "Ibirataia":["Prefeitura","Câmara"],
+  "Ibitiara":["Prefeitura","Câmara"],
+  "Ibitité":["Prefeitura","Câmara"],
+  "Ibotirama":["Prefeitura","Câmara"],
+  "Ichu":["Prefeitura","Câmara"],
+  "Igaporã":["Prefeitura","Câmara","SAAE"],
+  "Igrapiúna":["Prefeitura","Câmara"],
+  "Iguaí":["Prefeitura","Câmara"],
+  "Ilhéus":["Prefeitura","Câmara","CIMAZE","COMAIL","EDUCÃO","EMPAV","FUNDACI","ILHEUSTUR","MARAMATA","SAÚDE","SUTRAM"],
+  "Inhambupe":["Prefeitura","Câmara","SACI"],
+  "Ipecaetá":["Prefeitura","Câmara","IPSI"],
+  "Ipiaú":["Prefeitura","Câmara","CIMURC"],
+  "Ipirá":["Prefeitura","Câmara"],
+  "Ipupiara":["Prefeitura","Câmara"],
+  "Irajuba":["Prefeitura","Câmara","IPSMI"],
+  "Iramaia":["Prefeitura","Câmara"],
+  "Iraquara":["Prefeitura","Câmara"],
+  "Irará":["Prefeitura","Câmara"],
+  "Irecê":["Prefeitura","Câmara","CDSTI","CSRIRECE","STM"],
+  "Itabela":["Prefeitura","Câmara","CAPREMI"],
+  "Itaberaba":["Prefeitura","Câmara","CISRIS","ITAPREV","SMTT"],
+  "Itabuna":["Prefeitura","Câmara","ARSEPI","EDUCÃO","EMASA","FASI","FFG","FICC","FMSICA","FSMTI","IAPSEMI","IASI","PRII","SAÚDE"],
+  "Itacaré":["Prefeitura","Câmara","FAPEM","ITACARETUR"],
+  "Itaeté":["Prefeitura","Câmara"],
+  "Itagi":["Prefeitura","Câmara"],
+  "Itagibá":["Prefeitura","Câmara"],
+  "Itagimirim":["Prefeitura","Câmara"],
+  "Itaguaçu da Bahia":["Prefeitura","Câmara","SAAE"],
+  "Itaju do Colônia":["Prefeitura","Câmara"],
+  "Itajuípe":["Prefeitura","Câmara","SAAE"],
+  "Itamaraju":["Prefeitura","Câmara"],
+  "Itamari":["Prefeitura","Câmara"],
+  "Itambé":["Prefeitura","Câmara"],
+  "Itanagra":["Prefeitura","Câmara"],
+  "Itanhém":["Prefeitura","Câmara","CONSTRUIR"],
+  "Itaparica":["Prefeitura","Câmara"],
+  "Itapé":["Prefeitura","Câmara"],
+  "Itapebi":["Prefeitura","Câmara"],
+  "Itapetinga":["Prefeitura","Câmara","COMUTRAN","COTEMESB","SAAE"],
+  "Itapicuru":["Prefeitura","Câmara","FMS"],
+  "Itapitanga":["Prefeitura","Câmara"],
+  "Itaquara":["Prefeitura","Câmara"],
+  "Itarantim":["Prefeitura","Câmara"],
+  "Itatim":["Prefeitura","Câmara"],
+  "Itiruçu":["Prefeitura","Câmara"],
+  "Itiúba":["Prefeitura","Câmara"],
+  "Itororo":["Prefeitura","Câmara","SAAE"],
+  "Ituaçu":["Prefeitura","Câmara"],
+  "Ituberá":["Prefeitura","Câmara","FMS"],
+  "Iuiú":["Prefeitura","Câmara"],
+  "Jaborandi":["Prefeitura","Câmara","SAAE"],
+  "Jacaraci":["Prefeitura","Câmara"],
+  "Jacobina":["Prefeitura","Câmara","CONSAN","JACOBINATUR","JACOPREV","PAN DO POVO","SMTT"],
+  "Jaguaquara":["Prefeitura","Câmara"],
+  "Jaguarari":["Prefeitura","Câmara"],
+  "Jaguaripe":["Prefeitura","Câmara","CXPREV","PREVIM"],
+  "Jandaíra":["Prefeitura","Câmara"],
+  "Jequié":["Prefeitura","Câmara","CPISRJ","IPREJ","SUMTRAN"],
+  "Jeremoabo":["Prefeitura","Câmara","FMS"],
+  "Jiquiriçá":["Prefeitura","Câmara"],
+  "Jitaúna":["Prefeitura","Câmara"],
+  "João Dourado":["Prefeitura","Câmara","EMPAC"],
+  "Juazeiro":["Prefeitura","Câmara","AMA","CEPLA","CISRJ","CMC","CSTT","EDUCÃO","EMSEP","EMSURB","FACJU","FCJ","FECJU","FUMEPRO","IPJ","SAAE","SAÚDE","SEMTTUR","SLP","VALETUR"],
+  "Jucuruçu":["Prefeitura","Câmara"],
+  "Jussara":["Prefeitura","Câmara"],
+  "Jussari":["Prefeitura","Câmara","SAAE"],
+  "Jussiape":["Prefeitura","Câmara","SAAE"],
+  "Lafaiete Coutinho":["Prefeitura","Câmara"],
+  "Lagoa Real":["Prefeitura","Câmara"],
+  "Laje":["Prefeitura","Câmara"],
+  "Lajedão":["Prefeitura","Câmara"],
+  "Lajedinho":["Prefeitura","Câmara"],
+  "Lajedo do Tabocal":["Prefeitura","Câmara","IPL"],
+  "Lamarão":["Prefeitura","Câmara"],
+  "Lapão":["Prefeitura","Câmara"],
+  "Lauro de Freitas":["Prefeitura","Câmara","EDUCÃO","MRN","NOVAURB","SAÚDE"],
+  "Lençóis":["Prefeitura","Câmara"],
+  "Licínio de Almeida":["Prefeitura","Câmara"],
+  "Livramento de Nossa Senhora":["Prefeitura","Câmara"],
+  "Macaúbas":["Prefeitura","Câmara"],
+  "Madre de Deus":["Prefeitura","Câmara"],
+  "Maetinga":["Prefeitura","Câmara"],
+  "Maiquinique":["Prefeitura","Câmara"],
+  "Mairi":["Prefeitura","Câmara"],
+  "Malhada":["Prefeitura","Câmara"],
+  "Malhada de Pedras":["Prefeitura","Câmara"],
+  "Manoel Vitorino":["Prefeitura","Câmara"],
+  "Maracás":["Prefeitura","Câmara"],
+  "Maragogipe":["Prefeitura","Câmara","SAAE"],
+  "Marcionílio Souza":["Prefeitura","Câmara"],
+  "Mascote":["Prefeitura","Câmara"],
+  "Mata de São João":["Prefeitura","Câmara"],
+  "Matina":["Prefeitura","Câmara"],
+  "Medeiros Neto":["Prefeitura","Câmara"],
+  "Miguel Calmon":["Prefeitura","Câmara"],
+  "Milagres":["Prefeitura","Câmara"],
+  "Mirangaba":["Prefeitura","Câmara"],
+  "Mirante":["Prefeitura","Câmara"],
+  "Monte Alto":["Prefeitura","Câmara"],
+  "Monte Santo":["Prefeitura","Câmara"],
+  "Morpará":["Prefeitura","Câmara"],
+  "Morro do Chapéu":["Prefeitura","Câmara","IPMC"],
+  "Mortugaba":["Prefeitura","Câmara"],
+  "Mucugê":["Prefeitura","Câmara"],
+  "Mucuri":["Prefeitura","Câmara"],
+  "Mulungu do Morro":["Prefeitura","Câmara"],
+  "Mundo Novo":["Prefeitura","Câmara"],
+  "Muniz Ferreira":["Prefeitura","Câmara"],
+  "Muquém de São Francisco":["Prefeitura","Câmara"],
+  "Muritiba":["Prefeitura","Câmara"],
+  "Mutuípe":["Prefeitura","Câmara"],
+  "Nazaré":["Prefeitura","Câmara"],
+  "Nilo Peçanha":["Prefeitura","Câmara"],
+  "Nordestina":["Prefeitura","Câmara"],
+  "Nova Canaã":["Prefeitura","Câmara"],
+  "Nova Fátima":["Prefeitura","Câmara"],
+  "Nova Ibiá":["Prefeitura","Câmara"],
+  "Nova Itarana":["Prefeitura","Câmara"],
+  "Nova Redenção":["Prefeitura","Câmara"],
+  "Nova Soure":["Prefeitura","Câmara"],
+  "Nova Viçosa":["Prefeitura","Câmara"],
+  "Novo Horizonte":["Prefeitura","Câmara"],
+  "Novo Triunfo":["Prefeitura","Câmara"],
+  "Olindina":["Prefeitura","Câmara"],
+  "Oliveira dos Brejinhos":["Prefeitura","Câmara"],
+  "Ouriçangas":["Prefeitura","Câmara"],
+  "Ourolândia":["Prefeitura","Câmara"],
+  "Palmas de Monte Alto":["Prefeitura","Câmara"],
+  "Palmeiras":["Prefeitura","Câmara"],
+  "Paramirim":["Prefeitura","Câmara"],
+  "Paratinga":["Prefeitura","Câmara","SAAE"],
+  "Paripiranga":["Prefeitura","Câmara"],
+  "Pau Brasil":["Prefeitura","Câmara"],
+  "Paulo Afonso":["Prefeitura","Câmara","SAAE"],
+  "Pé de Serra":["Prefeitura","Câmara"],
+  "Pedrão":["Prefeitura","Câmara"],
+  "Pedro Alexandre":["Prefeitura","Câmara"],
+  "Piatã":["Prefeitura","Câmara"],
+  "Pilão Arcado":["Prefeitura","Câmara"],
+  "Pindaí":["Prefeitura","Câmara"],
+  "Pindobaçu":["Prefeitura","Câmara"],
+  "Pintadas":["Prefeitura","Câmara"],
+  "Piraí do Norte":["Prefeitura","Câmara"],
+  "Piripá":["Prefeitura","Câmara"],
+  "Piritiba":["Prefeitura","Câmara"],
+  "Planaltino":["Prefeitura","Câmara"],
+  "Planalto":["Prefeitura","Câmara"],
+  "Poções":["Prefeitura","Câmara"],
+  "Pojuca":["Prefeitura","Câmara"],
+  "Ponto Novo":["Prefeitura","Câmara"],
+  "Potiraguá":["Prefeitura","Câmara"],
+  "Prado":["Prefeitura","Câmara"],
+  "Presidente Dutra":["Prefeitura","Câmara"],
+  "Presidente Jânio Quadros":["Prefeitura","Câmara"],
+  "Presidente Tancredo Neves":["Prefeitura","Câmara"],
+  "Queimadas":["Prefeitura","Câmara"],
+  "Quijingue":["Prefeitura","Câmara"],
+  "Quixabeira":["Prefeitura","Câmara"],
+  "Rafael Jambeiro":["Prefeitura","Câmara"],
+  "Remanso":["Prefeitura","Câmara","SAAE"],
+  "Retirolândia":["Prefeitura","Câmara"],
+  "Riachão das Neves":["Prefeitura","Câmara"],
+  "Riachão do Jacuípe":["Prefeitura","Câmara"],
+  "Riacho de Santana":["Prefeitura","Câmara"],
+  "Ribeira do Amparo":["Prefeitura","Câmara"],
+  "Ribeira do Pombal":["Prefeitura","Câmara"],
+  "Ribeirão do Largo":["Prefeitura","Câmara"],
+  "Rio de Contas":["Prefeitura","Câmara"],
+  "Rio do Antônio":["Prefeitura","Câmara"],
+  "Rio do Pires":["Prefeitura","Câmara"],
+  "Rio Real":["Prefeitura","Câmara"],
+  "Rodelas":["Prefeitura","Câmara"],
+  "Ruy Barbosa":["Prefeitura","Câmara","SAAE"],
+  "Salinas da Margarida":["Prefeitura","Câmara"],
+  "Santa Bárbara":["Prefeitura","Câmara"],
+  "Santa Brígida":["Prefeitura","Câmara"],
+  "Santa Cruz Cabrália":["Prefeitura","Câmara"],
+  "Santa Cruz da Vitória":["Prefeitura","Câmara"],
+  "Santa Inês":["Prefeitura","Câmara"],
+  "Santa Luzia":["Prefeitura","Câmara"],
+  "Santa Maria da Vitória":["Prefeitura","Câmara","SAAE"],
+  "Santa Rita de Cássia":["Prefeitura","Câmara"],
+  "Santa Terezinha":["Prefeitura","Câmara"],
+  "Santaluz":["Prefeitura","Câmara"],
+  "Santana":["Prefeitura","Câmara"],
+  "Santanópolis":["Prefeitura","Câmara"],
+  "Santo Amaro":["Prefeitura","Câmara","STT"],
+  "Santo Antônio de Jesus":["Prefeitura","Câmara","EDUCÃO","ISAJ","SAÚDE","STM"],
+  "Santo Estêvão":["Prefeitura","Câmara"],
+  "São Desidério":["Prefeitura","Câmara"],
+  "São Domingos":["Prefeitura","Câmara"],
+  "São Felipe":["Prefeitura","Câmara"],
+  "São Francisco do Conde":["Prefeitura","Câmara","SAAE"],
+  "São Gabriel":["Prefeitura","Câmara"],
+  "São Gonçalo dos Campos":["Prefeitura","Câmara"],
+  "São José da Vitória":["Prefeitura","Câmara"],
+  "São José do Jacuípe":["Prefeitura","Câmara"],
+  "São Miguel das Matas":["Prefeitura","Câmara"],
+  "São Sebastião do Passé":["Prefeitura","Câmara"],
+  "Sapeaçu":["Prefeitura","Câmara"],
+  "Sátiro Dias":["Prefeitura","Câmara"],
+  "Saubara":["Prefeitura","Câmara"],
+  "Saúde":["Prefeitura","Câmara"],
+  "Seabra":["Prefeitura","Câmara"],
+  "Sebastião Laranjeiras":["Prefeitura","Câmara"],
+  "Senhor do Bonfim":["Prefeitura","Câmara","CISARHO","SAAE"],
+  "Sento Sé":["Prefeitura","Câmara"],
+  "Serra Dourada":["Prefeitura","Câmara"],
+  "Serra Preta":["Prefeitura","Câmara"],
+  "Serrinha":["Prefeitura","Câmara","ISERA","SAAE"],
+  "Serrolândia":["Prefeitura","Câmara"],
+  "Simões Filho":["Prefeitura","Câmara","EDUCÃO","SAÚDE"],
+  "Sítio do Mato":["Prefeitura","Câmara"],
+  "Sítio do Quinto":["Prefeitura","Câmara"],
+  "Sobradinho":["Prefeitura","Câmara"],
+  "Souto Soares":["Prefeitura","Câmara"],
+  "Tabocas do Brejo Velho":["Prefeitura","Câmara"],
+  "Tanhaçu":["Prefeitura","Câmara"],
+  "Tanque Novo":["Prefeitura","Câmara"],
+  "Tanquinho":["Prefeitura","Câmara"],
+  "Taperoá":["Prefeitura","Câmara"],
+  "Tapiramutá":["Prefeitura","Câmara"],
+  "Teixeira de Freitas":["Prefeitura","Câmara","SAAE","STM"],
+  "Teodoro Sampaio":["Prefeitura","Câmara"],
+  "Teofilândia":["Prefeitura","Câmara"],
+  "Teolândia":["Prefeitura","Câmara"],
+  "Terra Nova":["Prefeitura","Câmara"],
+  "Tremedal":["Prefeitura","Câmara"],
+  "Tucano":["Prefeitura","Câmara"],
+  "Uauá":["Prefeitura","Câmara"],
+  "Ubaíra":["Prefeitura","Câmara"],
+  "Ubaitaba":["Prefeitura","Câmara"],
+  "Ubatã":["Prefeitura","Câmara"],
+  "Uibaí":["Prefeitura","Câmara"],
+  "Umburanas":["Prefeitura","Câmara"],
+  "Una":["Prefeitura","Câmara"],
+  "Urandi":["Prefeitura","Câmara"],
+  "Uruçuca":["Prefeitura","Câmara"],
+  "Utinga":["Prefeitura","Câmara"],
+  "Valença":["Prefeitura","Câmara","SAAE","STM"],
+  "Valente":["Prefeitura","Câmara"],
+  "Várzea da Roça":["Prefeitura","Câmara"],
+  "Várzea do Poço":["Prefeitura","Câmara"],
+  "Várzea Nova":["Prefeitura","Câmara"],
+  "Varzedo":["Prefeitura","Câmara"],
+  "Vera Cruz":["Prefeitura","Câmara"],
+  "Vereda":["Prefeitura","Câmara"],
+  "Vitória da Conquista":["Prefeitura","Câmara","CISRVC","EDUCÃO","IMES","ISAVE","SAAE","SAÚDE","STM"],
+  "Wagner":["Prefeitura","Câmara"],
+  "Wanderley":["Prefeitura","Câmara"],
+  "Wenceslau Guimarães":["Prefeitura","Câmara"],
+  "Xique-Xique":["Prefeitura","Câmara","SAAE"],
+};
+
+// ── Preenche datalist ────────────────────────────────────────
+const datalist = document.getElementById('municipios-list');
+Object.keys(ENTIDADES_TCM).sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(m => {
+  const opt = document.createElement('option');
+  opt.value = m;
+  datalist.appendChild(opt);
+});
+
+// ── Normaliza texto para busca ───────────────────────────────
+function norm(s) {
+  return s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+}
+function findMun(txt) {
+  const n = norm(txt);
+  return Object.keys(ENTIDADES_TCM).find(k => norm(k) === n) || null;
+}
+
+// ── UI helpers ───────────────────────────────────────────────
 const clientsList = document.getElementById('clients-list');
 const emptyMsg    = document.getElementById('empty-msg');
 const btnAdd      = document.getElementById('btn-add-client');
@@ -711,88 +1146,102 @@ const btnSubmit   = document.getElementById('btn-submit');
 const fbSuccess   = document.getElementById('feedback-success');
 const fbError     = document.getElementById('feedback-error');
 
-// ── Endpoint: substitua pela URL do Google Apps Script ──────
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyEePOhMkCwAcaBA7S5DbAruSSAcfOqOKj6AfX-q00hwfGJtl5M5ONuLvFIDCjyVC4Q/exec';
 
 function updateEmpty() {
-  const rows = clientsList.querySelectorAll('.client-row');
-  emptyMsg.style.display = rows.length === 0 ? 'block' : 'none';
+  emptyMsg.style.display = clientsList.querySelectorAll('.client-row').length === 0 ? 'block' : 'none';
 }
 
-function addClient(municipio = '', entidade = 'Prefeitura') {
-  emptyMsg.style.display = 'none';
+function buildEntitySelect(sel, entities, chosen) {
+  sel.innerHTML = '<option value="">Selecione…</option>';
+  const main   = entities.filter(e => e==='Prefeitura'||e==='Câmara');
+  const others = entities.filter(e => e!=='Prefeitura'&&e!=='Câmara');
+  main.forEach(e => {
+    const o = document.createElement('option');
+    o.value = o.textContent = e;
+    if(e===chosen) o.selected=true;
+    sel.appendChild(o);
+  });
+  if(others.length) {
+    const grp = document.createElement('optgroup');
+    grp.label = 'Demais Entidades';
+    others.forEach(e => {
+      const o = document.createElement('option');
+      o.value = o.textContent = e;
+      if(e===chosen) o.selected=true;
+      grp.appendChild(o);
+    });
+    sel.appendChild(grp);
+  }
+}
 
+function addClient(municipio='', entidade='') {
+  emptyMsg.style.display = 'none';
   const row = document.createElement('div');
   row.className = 'client-row';
   row.innerHTML = `
-    <input type="text" placeholder="Nome do município" value="${municipio}"
-           aria-label="Município" required>
-    <select aria-label="Tipo de entidade">
-      <option value="Prefeitura"        ${entidade==='Prefeitura'?'selected':''}>Prefeitura</option>
-      <option value="Câmara"            ${entidade==='Câmara'?'selected':''}>Câmara</option>
-      <option value="Outras Entidades"  ${entidade==='Outras Entidades'?'selected':''}>Outras Entidades</option>
+    <input type="text" list="municipios-list" placeholder="Digite o município…"
+           class="municipio-input" value="${municipio}" aria-label="Município" required autocomplete="off">
+    <select class="entidade-select" aria-label="Entidade">
+      <option value="">Selecione…</option>
+      <option value="Prefeitura">Prefeitura</option>
+      <option value="Câmara">Câmara</option>
+      <option value="Outras Entidades">Outras Entidades</option>
     </select>
     <button type="button" class="btn-remove" aria-label="Remover">
       <svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </button>
-  `;
-  row.querySelector('.btn-remove').addEventListener('click', () => {
-    row.remove();
-    updateEmpty();
-  });
+    </button>`;
+
+  const munInput = row.querySelector('.municipio-input');
+  const entSel   = row.querySelector('.entidade-select');
+
+  function refresh() {
+    const key = findMun(munInput.value);
+    if(key) buildEntitySelect(entSel, ENTIDADES_TCM[key], entSel.value);
+  }
+
+  munInput.addEventListener('change', refresh);
+  munInput.addEventListener('blur',   refresh);
+
+  if(municipio) { refresh(); if(entidade) entSel.value = entidade; }
+
+  row.querySelector('.btn-remove').addEventListener('click', () => { row.remove(); updateEmpty(); });
   clientsList.insertBefore(row, emptyMsg);
 }
 
 btnAdd.addEventListener('click', () => addClient());
 
 function getClients() {
-  const rows = clientsList.querySelectorAll('.client-row');
-  return Array.from(rows).map(r => ({
-    municipio: r.querySelector('input').value.trim(),
-    entidade:  r.querySelector('select').value,
-  })).filter(c => c.municipio);
+  return Array.from(clientsList.querySelectorAll('.client-row')).map(r => ({
+    municipio: r.querySelector('.municipio-input').value.trim(),
+    entidade:  r.querySelector('.entidade-select').value,
+  })).filter(c => c.municipio && c.entidade);
 }
 
 function showFeedback(type) {
   fbSuccess.classList.remove('show');
   fbError.classList.remove('show');
-  if (type) document.getElementById(`feedback-${type}`).classList.add('show');
+  if(type) document.getElementById(`feedback-${type}`).classList.add('show');
 }
 
-form.addEventListener('submit', async (e) => {
+form.addEventListener('submit', async e => {
   e.preventDefault();
   showFeedback(null);
-
   const office   = document.getElementById('office').value.trim();
   const email    = document.getElementById('email').value.trim();
   const whatsapp = document.getElementById('whatsapp').value.trim();
   const termsOk  = document.getElementById('terms').checked;
   const clients  = getClients();
-
-  if (!office || !email) return;
-  if (clients.length === 0) {
-    alert('Adicione ao menos uma entidade para monitorar.');
-    return;
-  }
-  if (!termsOk) {
-    alert('Você precisa concordar com os termos de uso para continuar.');
-    return;
-  }
-
+  if(!office||!email) return;
+  if(!clients.length){ alert('Adicione ao menos uma entidade para monitorar.'); return; }
+  if(!termsOk){ alert('Você precisa concordar com os termos de uso para continuar.'); return; }
   btnSubmit.disabled = true;
   btnSubmit.textContent = 'Cadastrando…';
-
   try {
-    const payload = { nome: office, email, whatsapp, clientes: clients };
-    await fetch(ENDPOINT, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload),
-    });
+    await fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({nome:office,email,whatsapp,clientes:clients})});
     showFeedback('success');
     form.reset();
-    clientsList.querySelectorAll('.client-row').forEach(r => r.remove());
+    clientsList.querySelectorAll('.client-row').forEach(r=>r.remove());
     updateEmpty();
     btnSubmit.textContent = 'Cadastrado ✓';
   } catch {
