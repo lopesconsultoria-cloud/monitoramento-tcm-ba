@@ -1,1 +1,28 @@
+name: Monitoramento TCM-BA
 
+on:
+  schedule:
+    - cron: '0 13 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  monitorar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install requests
+
+      - name: Executar monitoramento TCM-BA
+        env:
+          EMAIL_REMETENTE: ${{ secrets.EMAIL_REMETENTE }}
+          EMAIL_SENHA: ${{ secrets.EMAIL_SENHA }}
+        run: python monitorar_tcm_ba.py
