@@ -1,0 +1,806 @@
+<title>Siaficont Notifica</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Source+Sans+3:wght@400;500;600&display=swap">
+
+<style>
+/* ── Tokens ────────────────────────────────────────────────── */
+:root {
+  --navy:        #1C3461;
+  --navy-mid:    #244080;
+  --blue:        #2660C5;
+  --blue-light:  #3D74D4;
+  --sky:         #EEF4FD;
+  --sky-border:  #C8D9F2;
+  --white:       #FFFFFF;
+  --text:        #1A2332;
+  --muted:       #5A6A80;
+  --border:      #D4DDE8;
+  --surface:     #F4F7FC;
+  --card:        #FFFFFF;
+  --success:     #0D9263;
+  --success-bg:  #E6F7F2;
+  --error:       #C0392B;
+  --error-bg:    #FDF0EE;
+  --input-bg:    #FFFFFF;
+  --input-border:#C2CEDF;
+  --input-focus: #2660C5;
+  --badge-bg:    #1C3461;
+  --badge-text:  #FFFFFF;
+  --step-num:    #C8D9F2;
+  --step-text:   #1C3461;
+  --shadow-card: 0 2px 16px rgba(28,52,97,.10), 0 1px 4px rgba(28,52,97,.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --navy:        #0F1E3C;
+    --navy-mid:    #172B58;
+    --blue:        #4D84E8;
+    --blue-light:  #6798EF;
+    --sky:         #111C30;
+    --sky-border:  #1E3158;
+    --white:       #0D1729;
+    --text:        #D8E6F8;
+    --muted:       #7A90AE;
+    --border:      #1E3158;
+    --surface:     #0D1729;
+    --card:        #13213A;
+    --success:     #18C480;
+    --success-bg:  #0D2A20;
+    --error:       #E05C50;
+    --error-bg:    #2A1010;
+    --input-bg:    #0F1E3C;
+    --input-border:#1E3158;
+    --input-focus: #4D84E8;
+    --badge-bg:    #1E3158;
+    --badge-text:  #94B8EF;
+    --step-num:    #1E3158;
+    --step-text:   #7AAAF0;
+    --shadow-card: 0 2px 20px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"] {
+  --navy:        #0F1E3C;
+  --navy-mid:    #172B58;
+  --blue:        #4D84E8;
+  --blue-light:  #6798EF;
+  --sky:         #111C30;
+  --sky-border:  #1E3158;
+  --white:       #0D1729;
+  --text:        #D8E6F8;
+  --muted:       #7A90AE;
+  --border:      #1E3158;
+  --surface:     #0D1729;
+  --card:        #13213A;
+  --success:     #18C480;
+  --success-bg:  #0D2A20;
+  --error:       #E05C50;
+  --error-bg:    #2A1010;
+  --input-bg:    #0F1E3C;
+  --input-border:#1E3158;
+  --input-focus: #4D84E8;
+  --badge-bg:    #1E3158;
+  --badge-text:  #94B8EF;
+  --step-num:    #1E3158;
+  --step-text:   #7AAAF0;
+  --shadow-card: 0 2px 20px rgba(0,0,0,.4);
+}
+
+/* ── Reset ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Nav ────────────────────────────────────────────────── */
+nav {
+  background: var(--navy);
+  padding: 0 clamp(1rem, 5vw, 3rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 58px;
+  gap: 1rem;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.nav-logo {
+  width: 32px; height: 32px;
+  background: var(--blue);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.nav-logo svg { width: 18px; height: 18px; }
+.nav-name {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #FFFFFF;
+  letter-spacing: .01em;
+}
+.nav-service {
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #94B8EF;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.nav-badge {
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 11.5px;
+  color: #A8C8F4;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+/* ── Main layout ────────────────────────────────────────── */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 2rem);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .hero { grid-template-columns: 1fr; }
+}
+
+/* ── Left column ────────────────────────────────────────── */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--sky);
+  border: 1px solid var(--sky-border);
+  border-radius: 20px;
+  padding: 4px 12px 4px 8px;
+  margin-bottom: 1.4rem;
+}
+.eyebrow-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--blue);
+  flex-shrink: 0;
+}
+.eyebrow span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.22;
+  text-wrap: balance;
+  margin-bottom: 1.1rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) h1 { color: var(--text); }
+}
+:root[data-theme="dark"] h1 { color: var(--text); }
+
+.subtitle {
+  font-size: 1.05rem;
+  color: var(--muted);
+  max-width: 52ch;
+  margin-bottom: 2rem;
+  line-height: 1.65;
+}
+
+.benefit-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  margin-bottom: 2.2rem;
+}
+.benefit-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: .97rem;
+  color: var(--text);
+}
+.benefit-icon {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--sky);
+  border: 1.5px solid var(--sky-border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.benefit-icon svg { width: 12px; height: 12px; }
+
+.tcm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--badge-bg);
+  border-radius: 8px;
+  padding: 10px 16px;
+  max-width: 360px;
+}
+.tcm-badge-icon {
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.12);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tcm-badge-icon svg { width: 20px; height: 20px; }
+.tcm-badge-text { line-height: 1.3; }
+.tcm-badge-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--badge-text);
+  opacity: .6;
+}
+.tcm-badge-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--badge-text);
+}
+
+/* ── Form card ────────────────────────────────────────────── */
+.form-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: clamp(1.5rem, 3vw, 2rem);
+  box-shadow: var(--shadow-card);
+  position: sticky;
+  top: 1.5rem;
+}
+
+.form-card-header {
+  margin-bottom: 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+.form-card-header h2 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: .25rem;
+}
+.form-card-header p {
+  font-size: .875rem;
+  color: var(--muted);
+}
+
+.form-group {
+  margin-bottom: 1.1rem;
+}
+label {
+  display: block;
+  font-size: .825rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: .4rem;
+  letter-spacing: .02em;
+}
+label .req { color: var(--blue); margin-left: 2px; }
+
+input[type="text"],
+input[type="email"],
+select {
+  width: 100%;
+  padding: .6rem .85rem;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: 7px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: .95rem;
+  color: var(--text);
+  transition: border-color .18s, box-shadow .18s;
+  outline: none;
+  -webkit-appearance: none;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+select:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(38,96,197,.15);
+}
+input::placeholder { color: var(--muted); opacity: .6; }
+
+/* entities section */
+.clients-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .5rem;
+}
+.clients-label-row label { margin-bottom: 0; }
+
+.clients-list {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  margin-bottom: .6rem;
+}
+
+.client-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 30px;
+  gap: .4rem;
+  align-items: center;
+}
+.client-row select { font-size: .875rem; }
+.client-row input { font-size: .875rem; }
+
+.btn-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+.btn-remove:hover { background: var(--error-bg); color: var(--error); }
+.btn-remove svg { width: 14px; height: 14px; pointer-events: none; }
+
+.btn-add {
+  background: none;
+  border: 1.5px dashed var(--sky-border);
+  border-radius: 7px;
+  padding: .5rem .85rem;
+  width: 100%;
+  cursor: pointer;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  transition: background .15s, border-color .15s;
+}
+.btn-add:hover { background: var(--sky); border-color: var(--blue); }
+.btn-add svg { width: 14px; height: 14px; }
+
+.empty-clients {
+  text-align: center;
+  padding: 1rem;
+  color: var(--muted);
+  font-size: .85rem;
+  background: var(--sky);
+  border-radius: 7px;
+  border: 1.5px dashed var(--sky-border);
+}
+
+/* terms checkbox */
+.terms-group { margin-top: .4rem; }
+.terms-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: .875rem;
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+  letter-spacing: 0;
+}
+.terms-label input[type="checkbox"] {
+  width: 16px; height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: var(--blue);
+}
+.terms-link {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.btn-submit {
+  width: 100%;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: .75rem 1.5rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.2rem;
+  transition: background .18s, transform .1s;
+  letter-spacing: .01em;
+}
+.btn-submit:hover { background: var(--blue-light); }
+.btn-submit:active { transform: scale(.98); }
+.btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+.form-note {
+  font-size: .78rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: .85rem;
+  line-height: 1.5;
+}
+
+/* feedback states */
+.feedback {
+  border-radius: 8px;
+  padding: .85rem 1rem;
+  font-size: .9rem;
+  line-height: 1.5;
+  margin-top: .8rem;
+  display: none;
+}
+.feedback.success {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid rgba(13,146,99,.2);
+}
+.feedback.error {
+  background: var(--error-bg);
+  color: var(--error);
+  border: 1px solid rgba(192,57,43,.2);
+}
+.feedback.show { display: block; }
+
+/* ── Como funciona ────────────────────────────────────────── */
+.how-section {
+  margin-top: clamp(3rem, 6vw, 5rem);
+  padding-top: clamp(2rem, 4vw, 3rem);
+  border-top: 1px solid var(--border);
+}
+.how-section h2 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  text-wrap: balance;
+  margin-bottom: 2rem;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@media (max-width: 600px) {
+  .steps { grid-template-columns: 1fr; }
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+.step-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--step-num);
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.step-title {
+  font-family: 'Sora', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--step-text);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .step-title { color: var(--text); }
+}
+:root[data-theme="dark"] .step-title { color: var(--text); }
+.step p {
+  font-size: .9rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+footer {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  padding: 1.5rem clamp(1rem, 4vw, 2rem);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: .8rem;
+  color: var(--muted);
+  background: var(--surface);
+}
+footer a { color: var(--blue); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+</style>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo">
+      <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="7" height="7" rx="1.5" fill="white" fill-opacity=".9"/>
+        <rect x="10" y="1" width="7" height="7" rx="1.5" fill="white" fill-opacity=".5"/>
+        <rect x="1" y="10" width="7" height="7" rx="1.5" fill="white" fill-opacity=".5"/>
+        <rect x="10" y="10" width="7" height="7" rx="1.5" fill="white" fill-opacity=".9"/>
+      </svg>
+    </div>
+    <div>
+      <div class="nav-name">Siaficont Sistemas</div>
+      <div class="nav-service">Notifica TCM-BA</div>
+    </div>
+  </a>
+  <div class="nav-badge">Serviço gratuito</div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div class="hero">
+
+    <!-- LEFT: pitch -->
+    <div class="hero-copy">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        <span>Monitoramento automático</span>
+      </div>
+
+      <h1>Alertas diários das publicações realizadas pelo TCM/BA.</h1>
+
+      <p class="subtitle">
+        Cadastre-se e receba por e-mail as publicações que as entidades de sua preferência forem notificadas no Diário do Tribunal de Contas dos Municípios da Bahia.
+      </p>
+
+      <ul class="benefit-list">
+        <li>
+          <span class="benefit-icon">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          Publicações do dia consolidadas em um único e-mail
+        </li>
+        <li>
+          <span class="benefit-icon">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          Lembrete das publicações dos últimos 7 dias para não perder prazos
+        </li>
+        <li>
+          <span class="benefit-icon">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          Monitoramento de Prefeituras, Câmaras Municipais e demais entidades
+        </li>
+        <li>
+          <span class="benefit-icon">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          Gratuito, sem cadastro de senha, sem anúncios
+        </li>
+      </ul>
+
+      <div class="tcm-badge">
+        <div class="tcm-badge-icon">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" fill="white" fill-opacity=".8"/>
+          </svg>
+        </div>
+        <div class="tcm-badge-text">
+          <div class="tcm-badge-label">Fonte oficial</div>
+          <div class="tcm-badge-name">Diário Oficial Eletrônico — TCM-BA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: form -->
+    <div class="form-card" id="form-card">
+      <div class="form-card-header">
+        <h2>Cadastrar</h2>
+        <p>Preencha uma vez. Os alertas chegam todo dia útil.</p>
+      </div>
+
+      <form id="reg-form" novalidate>
+        <div class="form-group">
+          <label for="office">Nome completo do interessado <span class="req">*</span></label>
+          <input type="text" id="office" name="office" placeholder="Ex: Anderson Lopes de Souza" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail <span class="req">*</span></label>
+          <input type="email" id="email" name="email" placeholder="contabilidade@seuescritorio.com.br" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="whatsapp">Contato / WhatsApp</label>
+          <input type="text" id="whatsapp" name="whatsapp" placeholder="(77) 99999-9999" autocomplete="tel">
+        </div>
+
+        <div class="form-group">
+          <div class="clients-label-row">
+            <label>Entidades monitoradas <span class="req">*</span></label>
+          </div>
+          <div class="clients-list" id="clients-list">
+            <div class="empty-clients" id="empty-msg">Nenhuma entidade adicionada ainda.</div>
+          </div>
+          <button type="button" class="btn-add" id="btn-add-client">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Adicionar entidade
+          </button>
+        </div>
+
+        <div class="form-group terms-group">
+          <label class="terms-label">
+            <input type="checkbox" id="terms" name="terms" required>
+            <span>Concordo com os <a href="#termos" class="terms-link">termos de uso</a> do serviço</span>
+          </label>
+        </div>
+
+        <div class="feedback" id="feedback-success" role="alert">
+          ✅ <strong>Cadastro realizado!</strong> O primeiro alerta chegará amanhã cedo no e-mail informado.
+        </div>
+        <div class="feedback" id="feedback-error" role="alert">
+          ⚠️ Erro ao enviar. Verifique sua conexão e tente novamente.
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-submit">Cadastrar gratuitamente</button>
+        <p class="form-note">Sem spam. Cancelamento a qualquer momento por e-mail.</p>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <h2>Como funciona</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Cadastro simples</div>
+        <p>Informe seus dados e a lista de entidades que deseja acompanhar — Prefeitura, Câmara ou outras.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Monitoramento diário</div>
+        <p>Todos os dias úteis, o sistema consulta automaticamente o Diário Oficial Eletrônico do TCM-BA e identifica publicações relevantes para as entidades indicadas no cadastro.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Alerta no e-mail</div>
+        <p>Você recebe um e-mail com as publicações do dia e um lembrete dos últimos 7 dias — com o texto publicado no Diário, caso haja.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>
+    Serviço gratuito oferecido pela <strong>Siaficont Sistemas</strong> ·
+    Dados extraídos do <a href="https://egbanet.egba.ba.gov.br/tcm" target="_blank" rel="noopener">Diário Oficial Eletrônico do TCM-BA</a> ·
+    <a href="mailto:contato@siaficont.com.br">Suporte</a>
+  </p>
+</footer>
+
+<script>
+const clientsList = document.getElementById('clients-list');
+const emptyMsg    = document.getElementById('empty-msg');
+const btnAdd      = document.getElementById('btn-add-client');
+const form        = document.getElementById('reg-form');
+const btnSubmit   = document.getElementById('btn-submit');
+const fbSuccess   = document.getElementById('feedback-success');
+const fbError     = document.getElementById('feedback-error');
+
+// ── Endpoint: substitua pela URL do Google Apps Script ──────
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyEePOhMkCwAcaBA7S5DbAruSSAcfOqOKj6AfX-q00hwfGJtl5M5ONuLvFIDCjyVC4Q/exec';
+
+function updateEmpty() {
+  const rows = clientsList.querySelectorAll('.client-row');
+  emptyMsg.style.display = rows.length === 0 ? 'block' : 'none';
+}
+
+function addClient(municipio = '', entidade = 'Prefeitura') {
+  emptyMsg.style.display = 'none';
+
+  const row = document.createElement('div');
+  row.className = 'client-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Nome do município" value="${municipio}"
+           aria-label="Município" required>
+    <select aria-label="Tipo de entidade">
+      <option value="Prefeitura"        ${entidade==='Prefeitura'?'selected':''}>Prefeitura</option>
+      <option value="Câmara"            ${entidade==='Câmara'?'selected':''}>Câmara</option>
+      <option value="Outras Entidades"  ${entidade==='Outras Entidades'?'selected':''}>Outras Entidades</option>
+    </select>
+    <button type="button" class="btn-remove" aria-label="Remover">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  `;
+  row.querySelector('.btn-remove').addEventListener('click', () => {
+    row.remove();
+    updateEmpty();
+  });
+  clientsList.insertBefore(row, emptyMsg);
+}
+
+btnAdd.addEventListener('click', () => addClient());
+
+function getClients() {
+  const rows = clientsList.querySelectorAll('.client-row');
+  return Array.from(rows).map(r => ({
+    municipio: r.querySelector('input').value.trim(),
+    entidade:  r.querySelector('select').value,
+  })).filter(c => c.municipio);
+}
+
+function showFeedback(type) {
+  fbSuccess.classList.remove('show');
+  fbError.classList.remove('show');
+  if (type) document.getElementById(`feedback-${type}`).classList.add('show');
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showFeedback(null);
+
+  const office   = document.getElementById('office').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const whatsapp = document.getElementById('whatsapp').value.trim();
+  const termsOk  = document.getElementById('terms').checked;
+  const clients  = getClients();
+
+  if (!office || !email) return;
+  if (clients.length === 0) {
+    alert('Adicione ao menos uma entidade para monitorar.');
+    return;
+  }
+  if (!termsOk) {
+    alert('Você precisa concordar com os termos de uso para continuar.');
+    return;
+  }
+
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = 'Cadastrando…';
+
+  try {
+    const payload = { nome: office, email, whatsapp, clientes: clients };
+    await fetch(ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload),
+    });
+    showFeedback('success');
+    form.reset();
+    clientsList.querySelectorAll('.client-row').forEach(r => r.remove());
+    updateEmpty();
+    btnSubmit.textContent = 'Cadastrado ✓';
+  } catch {
+    showFeedback('error');
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = 'Cadastrar gratuitamente';
+  }
+});
+
+updateEmpty();
+</script>
